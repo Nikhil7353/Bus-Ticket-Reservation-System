@@ -7,10 +7,23 @@ export default function AdminRoutes() {
   const [error, setError] = React.useState('');
   const [form, setForm] = React.useState({ source: '', destination: '', distance: '', hours: '', minutes: '' });
   const [editing, setEditing] = React.useState(null);
+  const [sourceOptions, setSourceOptions] = React.useState([]);
+  const [destinationOptions, setDestinationOptions] = React.useState([]);
 
   const load = async () => {
     setLoading(true); setError('');
-    try { setItems(await api.routes.list()); } catch (e) { setError(e?.message || 'Failed'); } finally { setLoading(false); }
+    try {
+      const routes = await api.routes.list();
+      setItems(routes);
+      const srcSet = new Set();
+      const dstSet = new Set();
+      (routes || []).forEach((r) => {
+        if (r?.source) srcSet.add(r.source);
+        if (r?.destination) dstSet.add(r.destination);
+      });
+      setSourceOptions(Array.from(srcSet).sort());
+      setDestinationOptions(Array.from(dstSet).sort());
+    } catch (e) { setError(e?.message || 'Failed'); } finally { setLoading(false); }
   };
   React.useEffect(() => { load(); }, []);
 
@@ -38,8 +51,18 @@ export default function AdminRoutes() {
       <h3>Routes</h3>
       <div className="mb-2 fw-semibold">Add / Edit Route</div>
       <form onSubmit={onSubmit} className="row g-2 mb-3">
-        <div className="col-md-3"><input placeholder="Source" className="form-control" value={form.source} onChange={(e)=>setForm({...form, source:e.target.value})} required /></div>
-        <div className="col-md-3"><input placeholder="Destination" className="form-control" value={form.destination} onChange={(e)=>setForm({...form, destination:e.target.value})} required /></div>
+        <div className="col-md-3">
+          <input list="sourceList" placeholder="Source" className="form-control" value={form.source} onChange={(e)=>setForm({...form, source:e.target.value})} required />
+          <datalist id="sourceList">
+            {sourceOptions.map(src => <option key={src} value={src} />)}
+          </datalist>
+        </div>
+        <div className="col-md-3">
+          <input list="destinationList" placeholder="Destination" className="form-control" value={form.destination} onChange={(e)=>setForm({...form, destination:e.target.value})} required />
+          <datalist id="destinationList">
+            {destinationOptions.map(dst => <option key={dst} value={dst} />)}
+          </datalist>
+        </div>
         <div className="col-md-2"><input placeholder="Distance (km)" className="form-control" type="number" value={form.distance} onChange={(e)=>setForm({...form, distance:e.target.value})} /></div>
         <div className="col-md-2">
           <div className="input-group">

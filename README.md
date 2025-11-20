@@ -10,15 +10,48 @@ Spring Boot + MySQL backend and React + Bootstrap frontend for bus ticket reserv
 
 See `docs/README.md` for details.
 
+## Tech Stack
+
+- Backend: Spring Boot 3, Spring Web, Spring Data JPA (Hibernate), MySQL, HikariCP, Swagger/OpenAPI
+- Frontend: React 18, React Router 6, Axios, Bootstrap 5, Webpack/Babel toolchain
+- Tooling: Maven 3.9+, Node.js/npm, MySQL 8+, Java 17
+
+## Prerequisites
+
+- Java 17 (JDK) and Maven installed and on your `PATH`
+- Node.js 18+ with npm
+- MySQL server running locally (or update the JDBC URL)
+- Optional: IDEs such as IntelliJ/VS Code and Docker if you plan to containerize later
+
 ## Quick Start
 
 Backend
-- Configure MySQL in `backend/src/main/resources/application.properties` (defaults: db `bus_reservation`, user `root`/`root`).
-- Run: `mvn spring-boot:run` (Swagger at `http://localhost:8080/swagger-ui.html`).
-- Dev profile (`spring.profiles.active=dev`) permits all requests (no JWT) for easy testing.
+1. Update `backend/src/main/resources/application.properties` if your MySQL username/password differ (defaults: `root` / `root`, DB `bus_reservation`; it will auto-create the schema).
+2. From `backend/` run:
+   ```bash
+   mvn spring-boot:run
+   ```
+   The API starts on `http://localhost:8080` with Swagger UI at `/swagger-ui.html`. The `dev` profile (default) disables authentication for easier testing.
+3. To build or run tests:
+   ```bash
+   mvn clean install
+   mvn test
+   ```
 
 Frontend
-- From `frontend/`, start dev server (e.g., `npm start`). App at `http://localhost:3000`.
+1. From `frontend/` install dependencies (first run only):
+   ```bash
+   npm install
+   ```
+2. Start the dev server:
+   ```bash
+   npm start
+   ```
+   The UI runs on `http://localhost:3000` and proxies `/api` calls to the backend.
+3. To build a production bundle:
+   ```bash
+   npm run build
+   ```
 
 ## Highlights
 
@@ -29,12 +62,10 @@ Frontend
 
 ## Admin User
 
-Registration always creates `CUSTOMER`. Seed an admin directly in DB, e.g.:
+Registration always creates `CUSTOMER`. For local/dev runs an admin user is seeded automatically via `AdminSeeder` (profile `dev`):
 
-```sql
-INSERT INTO `user` (name,email,phone,password,role)
-VALUES ('Admin','admin@bus.local','0000000000','admin123','ADMIN');
-```
+- Email: `admin@bus.local`
+- Password: `admin123`
 
-Or add a one‑time seeder (CommandLineRunner) to create an admin if missing.
+Override these with the `app.admin.*` properties in `backend/src/main/resources/application.properties`, or disable seeding by setting `app.admin.seed=false`. In other environments you can still seed manually or add your own provisioning logic.
 
